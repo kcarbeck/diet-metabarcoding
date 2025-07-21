@@ -2,16 +2,15 @@
 
 # any key can be overridden on the command line with --config project_name=value
 
-
 # other parameters
-email: "YOUR_EMAIL@DOMAIN.COM" # for email notifications
+email: "YOUR_EMAIL@DOMAIN.COM" # for email notifications or leave empty to disable
 
 # ---------------------------------------------------------------------------
 # core identifiers & file paths
 # ---------------------------------------------------------------------------
 project_name: orchards
-samplesheet: "data/metadata/orchards_manifest.tsv"        # qiime manifest (absolute paths!)
-metadata_tsv: "data/metadata/orchards_meta.tsv"           # sample metadata
+samplesheet: "data/metadata/orchards_manifest.tsv"        # qiime manifest (absolute paths!) - REQUIRED: Create this file
+metadata_tsv: "data/metadata/orchards_meta.tsv"           # sample metadata - REQUIRED: Create this file
 classifier_path: "references/orchards_bold_final_classifier.qza" # path to the final classifier for the diet pipeline
 
 # ---------------------------------------------------------------------------

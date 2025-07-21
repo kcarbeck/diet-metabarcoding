@@ -64,5 +64,5 @@ rule qiime_import_demux:
             " --i-data {output.demux_qza} "
             " --o-visualization {output.demux_qzv} "
             " 2>&1 | tee -a {log}; "
-            "echo 'Import step complete. Demux summary at: {output.demux_qzv}' | mail -s '[diet-metabarcoding] Step complete: import' {config[email]}"
+            "if [ -n '{config.get(\"email\", \"\")}' ] && [ -n \"$(which mail)\" ]; then echo 'Import step complete. Demux summary at: {output.demux_qzv}' | mail -s '[diet-metabarcoding] Step complete: import' '{config.get(\"email\", \"\")}'; fi"
         ) 

@@ -58,14 +58,14 @@ onsuccess:
     This block is executed upon successful completion of the entire pipeline.
     The main target rules also have their own completion notifications.
     """
-    shell("echo 'Snakemake pipeline completed successfully.' | mail -s '[diet-metabarcoding] Pipeline Success' {config[email]}")
+    shell("echo 'Snakemake pipeline completed successfully.' | mail -s '[diet-metabarcoding] Pipeline Success' {config.get('email', '')}")
 
 onerror:
     """
     This block is executed if any rule in the pipeline fails. It sends an
     email notification with the error details for long running jobs
     """
-    shell("echo 'A step in the Snakemake pipeline failed. See logs for details.' | mail -s '[diet-metabarcoding] Pipeline FAILED' {config[email]}")
+    shell("echo 'A step in the Snakemake pipeline failed. See logs for details.' | mail -s '[diet-metabarcoding] Pipeline FAILED' {config.get('email', '')}")
 
 
 # -----------------------------------------------------------------
@@ -89,7 +89,7 @@ rule build_initial_classifier:
     shell:
         """
         echo "Initial BOLD classifier pipeline complete. Classifier at: {input}"
-        if [ -n "{params.email}" ]; then
+        if [ -n "{params.email}" ] && [ -n "$(which mail)" ]; then
             echo "Initial BOLD classifier is complete. Find it at {input}" | mail -s "[diet-metabarcoding] Initial Classifier Complete" "{params.email}"
         fi
         touch {output}
@@ -108,7 +108,7 @@ rule build_final_classifier:
     shell:
         """
         echo "Final, alignment-based classifier pipeline complete. Classifier at: {input}"
-        if [ -n "{params.email}" ]; then
+        if [ -n "{params.email}" ] && [ -n "$(which mail)" ]; then
             echo "The final, alignment-based BOLD classifier is complete. Find it at {input}" | mail -s "[diet-metabarcoding] Final Classifier Complete" "{params.email}"
         fi
         touch {output}
@@ -146,7 +146,7 @@ rule run_diet_pipeline:
     shell:
         """
         echo "QIIME2 diet analysis pipeline is complete. Final visualizations are in {workdir_path}/visualization/ and {workdir_path}/diversity/"
-        if [ -n "{params.email}" ]; then
+        if [ -n "{params.email}" ] && [ -n "$(which mail)" ]; then
             echo "The QIIME2 diet analysis pipeline is complete. Find final reports in {workdir_path}/visualization/ and {workdir_path}/diversity/" | mail -s "[diet-metabarcoding] Diet Analysis Complete" "{params.email}"
         fi
         """

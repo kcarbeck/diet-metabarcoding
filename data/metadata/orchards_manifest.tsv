@@ -1,0 +1,4 @@
+sample-id	forward-absolute-filepath	reverse-absolute-filepath
+# Replace the example below with your actual sample data
+# sample1	/absolute/path/to/sample1_R1.fastq.gz	/absolute/path/to/sample1_R2.fastq.gz
+# sample2	/absolute/path/to/sample2_R1.fastq.gz	/absolute/path/to/sample2_R2.fastq.gz 

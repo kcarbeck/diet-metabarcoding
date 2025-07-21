@@ -44,6 +44,15 @@ class BOLDDataGatherer:
                 else:
                     print(f"no data returned for {taxon}. it might be an empty taxon.")
                     return None
+            except AttributeError as e:
+                print(f"bold-py API error for {taxon} (attempt {attempt + 1}/{retries}): {e}")
+                print("This might indicate an issue with the bold-py library version or API changes.")
+                if attempt < retries - 1:
+                    print(f"retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    print(f"failed to query bold for {taxon} after {retries} attempts.")
+                    return None
             except Exception as e:
                 print(f"error querying bold for {taxon} (attempt {attempt + 1}/{retries}): {e}")
                 if attempt < retries - 1:
