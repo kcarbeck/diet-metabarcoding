@@ -1,0 +1,97 @@
+# orchards.yaml – settings for the Ithaca, NY orchards diet project
+
+# any key can be overridden on the command line with --config project_name=value
+
+
+# other parameters
+email: "YOUR_EMAIL@DOMAIN.COM" # for email notifications
+
+# ---------------------------------------------------------------------------
+# core identifiers & file paths
+# ---------------------------------------------------------------------------
+project_name: orchards
+samplesheet: "data/metadata/orchards_manifest.tsv"        # qiime manifest (absolute paths!)
+metadata_tsv: "data/metadata/orchards_meta.tsv"           # sample metadata
+classifier_path: "references/orchards_bold_final_classifier.qza" # path to the final classifier for the diet pipeline
+
+# ---------------------------------------------------------------------------
+# sequencing locus & primers
+# ---------------------------------------------------------------------------
+# BOLD marker code. Must match a valid code on BOLD, e.g., "COI-5P"
+locus: "COI-5P"
+
+# Forward / reverse primers (5' –> 3') for trimming and BOLD extraction
+forward_primer: "GGTCAACAAATCATAAAGATATTGG"                # LCO1490
+reverse_primer: "GGWACTAATCAATTTCCAAATCC"                  # HCO2198
+
+# 3' adapters – leave blank if none
+adapter_f: "GGATTTGGAAATTGATTAGTWCC"
+adapter_r: "CCAATATCTTTATGATTTGTTGACC"
+
+# ---------------------------------------------------------------------------
+# BOLD classifier build parameters
+# ---------------------------------------------------------------------------
+# set to false to skip building a classifier (e.g., if you already have one)
+build_bold_classifier: true        
+
+# path to existing BOLD data 
+# VERY IMPORTANT!!!!!!!!!!! : if using pre-downloaded data, put the absolute path here
+# if left empty the pipeline will download data from the bold database...which is SLOW
+# BUT,leave empty to gather from scratch
+bold_raw_path: ""  
+
+# Geographic filtering for BOLD data (optional - leave empty to skip)
+# for this run, we are filtering for new york, usa
+geo_filter:
+  countries: ["USA"] #comma separated list of countries
+  states: ["New York"] #comma separated list of states  
+  bbox: [] #lax_min,lax_max,lat_min,lat_max
+
+# BOLD processing parameters
+bold_min_length: 165
+# Alignment & final classifier parameters
+bold_subsample_size: 3000         # Number of sequences for small alignment
+bold_mafft_threads: -1            # -1 for all available threads
+# Training parameters for the final, alignment-based classifier
+reads_per_batch: 6000
+n_jobs: 6
+
+# ---------------------------------------------------------------------------
+# DADA2 parameters (for diet analysis pipeline)
+# ---------------------------------------------------------------------------
+trim_left_f: 25
+trim_left_r: 25
+trunc_len_f: 220
+trunc_len_r: 200
+min_overlap: 50 
+
+# ---------------------------------------------------------------------------
+# filtering thresholds (for diet analysis pipeline)
+# ---------------------------------------------------------------------------
+# taxonomic filter (regex) to keep desired taxa (e.g., "Arthropoda|Chordata")
+tax_filter: "Arthropoda"
+# minimum total reads for an ASV to be kept
+min_read_count: 10 # filter ASVs with <10 total reads
+# minimum proportion of samples an ASV must be in to be kept (0.0 to 1.0)
+min_prevalence: 0.05 # keep ASVs present in >=5% of samples
+
+# ---------------------------------------------------------------------------
+# controls – include blanks & mock community samples in downstream summaries?
+# ---------------------------------------------------------------------------
+include_blanks: true
+include_mock: true
+
+# ---------------------------------------------------------------------------
+# diversity / rarefaction parameters
+# ---------------------------------------------------------------------------
+collapse_level: 7           # taxonomic level for collapse (e.g., 7 for species)
+alpha_min_depth: 500
+alpha_max_depth: 30000 #7000 orginal tuitorial, but didn't work so updated to 30000
+rarefy_sampling_depth: 2000
+#copied from legacy orchard pipeline
+
+# ---------------------------------------------------------------------------
+# derived path (do not edit below)
+# ---------------------------------------------------------------------------
+workdir: results/{project_name}
+
