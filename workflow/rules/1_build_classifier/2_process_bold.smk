@@ -7,6 +7,16 @@
 # cleaning and validation step to ensure data integrity before importing to QIIME2.
 
 # ---------------------------------------------------------------------
+# config handles
+# ---------------------------------------------------------------------
+project = config["project_name"]
+workdir_path = f"results/{project}"
+forward_primer = config["forward_primer"]
+reverse_primer = config["reverse_primer"]
+locus = config["locus"]
+bold_min_length = config["bold_min_length"]
+
+# ---------------------------------------------------------------------
 # Rule 2.1: Filter BOLD data by geography (optional)
 # ---------------------------------------------------------------------
 rule bold_geo_filter:
@@ -20,17 +30,17 @@ rule bold_geo_filter:
     """
     input:
         # Depends on the raw data from the gathering step.
-        raw_data = f"{workdir}/bold/raw_bold_data.tsv"
+        raw_data = f"{workdir_path}/bold/raw_bold_data.tsv"
     output:
         # The output is a new TSV file with the filtered data.
-        filtered_data = f"{workdir}/bold/bold_filtered.tsv"
+        filtered_data = f"{workdir_path}/bold/bold_filtered.tsv"
     params:
         # Geographic filter parameters are pulled from the config.
         countries = lambda w: ','.join(config.get("geo_filter", {}).get("countries", [])),
         states = lambda w: ','.join(config.get("geo_filter", {}).get("states", [])),
         bbox = lambda w: ','.join(map(str, config.get("geo_filter", {}).get("bbox", [])))
     log:
-        f"{workdir}/logs/bold_geo_filter.log"
+        f"{workdir_path}/logs/bold_geo_filter.log"
     conda:
         "../../envs/bold-pipeline.yml"
     shell:
@@ -75,18 +85,18 @@ rule bold_extract_reads:
     """
     input:
         # Depends on the geographically filtered (or unfiltered) data.
-        tsv = f"{workdir}/bold/bold_filtered.tsv"
+        tsv = f"{workdir_path}/bold/bold_filtered.tsv"
     output:
         # Produces a FASTA file of sequences and a TSV of taxonomies.
-        fasta = f"{workdir}/bold/bold_trimmed_seqs.fasta",
-        taxonomy = f"{workdir}/bold/bold_trimmed_taxonomy.tsv"
+        fasta = f"{workdir_path}/bold/bold_trimmed_seqs.fasta",
+        taxonomy = f"{workdir_path}/bold/bold_trimmed_taxonomy.tsv"
     params:
         f_primer = forward_primer,
         r_primer = reverse_primer,
         locus = locus,
         min_length = bold_min_length
     log:
-        f"{workdir}/logs/bold_extract_reads.log"
+        f"{workdir_path}/logs/bold_extract_reads.log"
     conda:
         "../../envs/bold-pipeline.yml"
     shell:
@@ -129,17 +139,17 @@ rule bold_clean_and_validate:
     """
     input:
         # Takes the raw extracted FASTA and taxonomy files.
-        fasta = f"{workdir}/bold/bold_trimmed_seqs.fasta",
-        taxonomy = f"{workdir}/bold/bold_trimmed_taxonomy.tsv"
+        fasta = f"{workdir_path}/bold/bold_trimmed_seqs.fasta",
+        taxonomy = f"{workdir_path}/bold/bold_trimmed_taxonomy.tsv"
     output:
         # Produces cleaned and validated versions of the files.
-        cleaned_fasta = f"{workdir}/bold/bold_cleaned_seqs.fasta",
-        cleaned_taxonomy = f"{workdir}/bold/bold_cleaned_taxonomy.tsv"
+        cleaned_fasta = f"{workdir_path}/bold/bold_cleaned_seqs.fasta",
+        cleaned_taxonomy = f"{workdir_path}/bold/bold_cleaned_taxonomy.tsv"
     params:
         # Minimum sequence length for a record to be kept.
         min_length = bold_min_length
     log:
-        f"{workdir}/logs/bold_cleaning.log"
+        f"{workdir_path}/logs/bold_cleaning.log"
     conda:
         "../../envs/bold-pipeline.yml"
     shell:

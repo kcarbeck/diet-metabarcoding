@@ -8,6 +8,16 @@
 # the final classifier is highly specific to the target primers.
 
 # ---------------------------------------------------------------------
+# config handles
+# ---------------------------------------------------------------------
+project = config["project_name"]
+workdir_path = f"results/{project}"
+forward_primer = config["forward_primer"]
+reverse_primer = config["reverse_primer"]
+locus = config["locus"]
+bold_min_length = config["bold_min_length"]
+
+# ---------------------------------------------------------------------
 # Rule 5.1: Prepare subsample for small alignment
 # ---------------------------------------------------------------------
 rule bold_prepare_small_alignment_subsample:
@@ -21,24 +31,24 @@ rule bold_prepare_small_alignment_subsample:
     the initial alignment.
     """
     input:
-        seqs_qza = f"{workdir}/bold/bold_derep_seqs.qza",
-        tax_qza = f"{workdir}/bold/bold_derep_taxonomy.qza"
+        seqs_qza = f"{workdir_path}/bold/bold_derep_seqs.qza",
+        tax_qza = f"{workdir_path}/bold/bold_derep_taxonomy.qza"
     output:
-        subsample_fasta = f"{workdir}/bold/alignment/derep_subsample.fasta",
-        full_seqs_fasta = f"{workdir}/bold/alignment/derep_seqs.fasta",
-        full_tax_tsv = f"{workdir}/bold/alignment/derep_taxonomy.tsv"
+        subsample_fasta = f"{workdir_path}/bold/alignment/derep_subsample.fasta",
+        full_seqs_fasta = f"{workdir_path}/bold/alignment/derep_seqs.fasta",
+        full_tax_tsv = f"{workdir_path}/bold/alignment/derep_taxonomy.tsv"
     params:
         subsample_size = config.get("bold_subsample_size", 3000),
         min_len = 150,
         max_len = 1000
     log:
-        f"{workdir}/logs/bold_prepare_subsample.log"
+        f"{workdir_path}/logs/bold_prepare_subsample.log"
     conda:
         "../../envs/bold-pipeline.yml"
     shell:
         """
         set -euo pipefail
-        tmp_dir="{workdir}/bold/alignment/tmp_subsample"
+        tmp_dir="{workdir_path}/bold/alignment/tmp_subsample"
         mkdir -p $tmp_dir
 
         echo "Exporting QIIME2 artifacts for alignment..."
@@ -72,12 +82,12 @@ rule bold_prepare_small_alignment_subsample:
 rule bold_create_primers_fasta:
     """Create a FASTA file containing the forward and reverse primers."""
     output:
-        primers_fasta = f"{workdir}/bold/alignment/anml_primers.fasta"
+        primers_fasta = f"{workdir_path}/bold/alignment/anml_primers.fasta"
     params:
         f_primer = forward_primer,
         r_primer = reverse_primer
     log:
-        f"{workdir}/logs/bold_create_primers.log"
+        f"{workdir_path}/logs/bold_create_primers.log"
     shell:
         """
         set -euo pipefail
@@ -96,13 +106,13 @@ rule bold_create_primers_fasta:
 rule bold_small_alignment:
     """Perform a small alignment with MAFFT on the subsample."""
     input:
-        subsample_fasta = f"{workdir}/bold/alignment/derep_subsample.fasta"
+        subsample_fasta = f"{workdir_path}/bold/alignment/derep_subsample.fasta"
     output:
-        aligned_fasta = f"{workdir}/bold/alignment/derep_subsample_aligned.fasta"
+        aligned_fasta = f"{workdir_path}/bold/alignment/derep_subsample_aligned.fasta"
     params:
         threads = config.get("bold_mafft_threads", -1)
     log:
-        f"{workdir}/logs/bold_small_alignment.log"
+        f"{workdir_path}/logs/bold_small_alignment.log"
     conda:
         "../../envs/bold-pipeline.yml"
     shell:
@@ -120,15 +130,15 @@ rule bold_small_alignment:
 rule bold_identify_primer_coordinates:
     """Identify primer coordinates by aligning primers to the small alignment."""
     input:
-        aligned_fasta = f"{workdir}/bold/alignment/derep_subsample_aligned.fasta",
-        primers_fasta = f"{workdir}/bold/alignment/anml_primers.fasta"
+        aligned_fasta = f"{workdir_path}/bold/alignment/derep_subsample_aligned.fasta",
+        primers_fasta = f"{workdir_path}/bold/alignment/anml_primers.fasta"
     output:
-        mapped_fasta = f"{workdir}/bold/alignment/ref_primers_aligned.fasta",
-        map_file = f"{workdir}/bold/alignment/anml_primers.fasta.map"
+        mapped_fasta = f"{workdir_path}/bold/alignment/ref_primers_aligned.fasta",
+        map_file = f"{workdir_path}/bold/alignment/anml_primers.fasta.map"
     params:
         threads = config.get("bold_mafft_threads", -1)
     log:
-        f"{workdir}/logs/bold_identify_coordinates.log"
+        f"{workdir_path}/logs/bold_identify_coordinates.log"
     conda:
         "../../envs/bold-pipeline.yml"
     shell:
@@ -152,12 +162,12 @@ rule bold_prepare_large_alignment_set:
     prevents re-aligning sequences that are already part of the reference.
     """
     input:
-        full_seqs_fasta = f"{workdir}/bold/alignment/derep_seqs.fasta",
-        subsample_fasta = f"{workdir}/bold/alignment/derep_subsample.fasta"
+        full_seqs_fasta = f"{workdir_path}/bold/alignment/derep_seqs.fasta",
+        subsample_fasta = f"{workdir_path}/bold/alignment/derep_subsample.fasta"
     output:
-        large_alignment_set = f"{workdir}/bold/alignment/seqsForLargeAlignment.fasta"
+        large_alignment_set = f"{workdir_path}/bold/alignment/seqsForLargeAlignment.fasta"
     log:
-        f"{workdir}/logs/bold_prepare_large_alignment_set.log"
+        f"{workdir_path}/logs/bold_prepare_large_alignment_set.log"
     conda:
         "../../envs/bold-pipeline.yml"
     shell:
@@ -166,10 +176,10 @@ rule bold_prepare_large_alignment_set:
         echo "Preparing sequences for large alignment by removing reference subsample..."
         
         # Extract IDs from the subsample to create a droplist
-        grep '^>' {input.subsample_fasta} | sed 's/^>//' > {workdir}/bold/alignment/droplist.ids
+        grep '^>' {input.subsample_fasta} | sed 's/^>//' > {workdir_path}/bold/alignment/droplist.ids
         
         # Use seqkit to exclude the subsample sequences from the full set
-        seqkit grep -v --pattern-file {workdir}/bold/alignment/droplist.ids {input.full_seqs_fasta} > {output.large_alignment_set}
+        seqkit grep -v --pattern-file {workdir_path}/bold/alignment/droplist.ids {input.full_seqs_fasta} > {output.large_alignment_set}
         
         echo "Sequence set for large alignment is ready."
         2>&1 | tee {log}
@@ -181,14 +191,14 @@ rule bold_prepare_large_alignment_set:
 rule bold_large_alignment:
     """Align the full dataset to the small reference alignment."""
     input:
-        seqs_for_large_alignment = f"{workdir}/bold/alignment/seqsForLargeAlignment.fasta",
-        ref_aligned = f"{workdir}/bold/alignment/ref_primers_aligned.fasta"
+        seqs_for_large_alignment = f"{workdir_path}/bold/alignment/seqsForLargeAlignment.fasta",
+        ref_aligned = f"{workdir_path}/bold/alignment/ref_primers_aligned.fasta"
     output:
-        large_aligned = f"{workdir}/bold/alignment/large_alignment.fasta"
+        large_aligned = f"{workdir_path}/bold/alignment/large_alignment.fasta"
     params:
         threads = config.get("bold_mafft_threads", -1)
     log:
-        f"{workdir}/logs/bold_large_alignment.log"
+        f"{workdir_path}/logs/bold_large_alignment.log"
     conda:
         "../../envs/bold-pipeline.yml"
     shell:
@@ -206,18 +216,18 @@ rule bold_large_alignment:
 rule bold_extract_large_amplicon:
     """Extract the final amplicon region from the full alignment."""
     input:
-        large_aligned = f"{workdir}/bold/alignment/large_alignment.fasta",
-        map_file = f"{workdir}/bold/alignment/anml_primers.fasta.map"
+        large_aligned = f"{workdir_path}/bold/alignment/large_alignment.fasta",
+        map_file = f"{workdir_path}/bold/alignment/anml_primers.fasta.map"
     output:
-        final_fasta = f"{workdir}/bold/alignment/ref_primers_trimmed_large.fasta"
+        final_fasta = f"{workdir_path}/bold/alignment/ref_primers_trimmed_large.fasta"
     log:
-        f"{workdir}/logs/bold_extract_large_amplicon.log"
+        f"{workdir_path}/logs/bold_extract_large_amplicon.log"
     conda:
         "../../envs/bold-pipeline.yml"
     shell:
         """
         set -euo pipefail
-        tmp_trimmed="{workdir}/bold/alignment/ref_anml_primers_trimmed.fasta"
+        tmp_trimmed="{workdir_path}/bold/alignment/ref_anml_primers_trimmed.fasta"
         
         echo "Parsing trimming coordinates from MAFFT map file..."
         # Get the 1-based position of the last base of the forward primer

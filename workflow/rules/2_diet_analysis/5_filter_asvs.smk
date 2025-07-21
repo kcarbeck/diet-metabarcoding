@@ -5,7 +5,7 @@
 # config handles
 # ---------------------------------------------------------------------
 project   = config["project_name"]
-workdir   = f"results/{project}"
+workdir_path = f"results/{project}"
 
 tax_include = config.get("tax_filter", "Arthropoda")  # regex include pattern
 min_freq    = int(config.get("min_read_count", 0))
@@ -26,19 +26,19 @@ _param = lambda flag, val: f" {flag} {val}" if val else ""
 
 rule filter_table:
     input:
-        table_qza   = f"{workdir}/dada2/table.qza",
-        taxonomy_qza= f"{workdir}/taxonomy/taxonomy.qza"
+        table_qza   = f"{workdir_path}/dada2/table.qza",
+        taxonomy_qza= f"{workdir_path}/taxonomy/taxonomy.qza"
     output:
-        filt_table_qza = f"{workdir}/filter/filtered_table.qza",
-        filt_table_qzv = f"{workdir}/filter/filtered_table.qzv"
+        filt_table_qza = f"{workdir_path}/filter/filtered_table.qza",
+        filt_table_qzv = f"{workdir_path}/filter/filtered_table.qzv"
     log:
-        f"{workdir}/logs/filter.log"
+        f"{workdir_path}/logs/filter.log"
     conda:
         qiime_env
     shell:
         (
             "set -euo pipefail; "
-            "mkdir -p {workdir}/filter {workdir}/logs; "
+            "mkdir -p {workdir_path}/filter {workdir_path}/logs; "
             # 1) taxonomy include filter
             "qiime taxa filter-table "
             " --i-table {input.table_qza} "

@@ -14,19 +14,19 @@ r_env     = "envs/phyloseq.yml"        # create if you want an R-only env
 
 rule export_to_r:
     input:
-        table_qza    = f"{workdir}/filter/filtered_table.qza",
-        taxonomy_qza = f"{workdir}/taxonomy/taxonomy.qza"
+        table_qza    = f"{workdir_path}/filter/filtered_table.qza",
+        taxonomy_qza = f"{workdir_path}/taxonomy/taxonomy.qza"
     output:
-        biom = f"{workdir}/export/feature-table.biom",
-        tax  = f"{workdir}/export/taxonomy.tsv"
+        biom = f"{workdir_path}/export/feature-table.biom",
+        tax  = f"{workdir_path}/export/taxonomy.tsv"
     log:
-        f"{workdir}/logs/export.log"
+        f"{workdir_path}/logs/export.log"
     conda:
         qiime_env
     shell:
         (
             "set -euo pipefail; "
-            "mkdir -p {workdir}/export {workdir}/logs; "
+            "mkdir -p {workdir_path}/export {workdir_path}/logs; "
             "TMP_DIR_TABLE=$(mktemp -d); "
             "qiime tools export --input-path {input.table_qza} --output-path $TMP_DIR_TABLE 2>&1 | tee {log}; "
             "mv $TMP_DIR_TABLE/feature-table.biom {output.biom}; "
@@ -43,17 +43,17 @@ rule export_to_r:
 
 rule export_rarefied_to_r:
     input:
-        table_qza = f"{workdir}/diversity/rarefied_table.qza"
+        table_qza = f"{workdir_path}/diversity/rarefied_table.qza"
     output:
-        biom = f"{workdir}/export/rarefied-feature-table.biom"
+        biom = f"{workdir_path}/export/rarefied-feature-table.biom"
     log:
-        f"{workdir}/logs/export_rarefied.log"
+        f"{workdir_path}/logs/export_rarefied.log"
     conda:
         qiime_env
     shell:
         (
             "set -euo pipefail; "
-            "mkdir -p {workdir}/export {workdir}/logs; "
+            "mkdir -p {workdir_path}/export {workdir_path}/logs; "
             "TMP_DIR=$(mktemp -d); "
             "qiime tools export --input-path {input.table_qza} --output-path $TMP_DIR 2>&1 | tee {log}; "
             "mv $TMP_DIR/feature-table.biom {output.biom}; "
@@ -66,18 +66,18 @@ rule export_rarefied_to_r:
 
 rule relabund_plot:
     input:
-        biom = f"{workdir}/export/feature-table.biom",
-        tax  = f"{workdir}/export/taxonomy.tsv",
+        biom = f"{workdir_path}/export/feature-table.biom",
+        tax  = f"{workdir_path}/export/taxonomy.tsv",
         metadata = config["metadata_tsv"]
     output:
-        pdf = f"{workdir}/visualization/rel_abund.pdf"
+        pdf = f"{workdir_path}/visualization/rel_abund.pdf"
     log:
-        f"{workdir}/logs/relabund_plot.log"
+        f"{workdir_path}/logs/relabund_plot.log"
     conda:
         r_env
     shell:
         (
-            "set -euo pipefail; mkdir -p {workdir}/visualization {workdir}/logs; "
+            "set -euo pipefail; mkdir -p {workdir_path}/visualization {workdir_path}/logs; "
             "Rscript workflow/scripts/rel_abund_plot.R {input.biom} {input.tax} {input.metadata} {output.pdf} 2>&1 | tee {log}"
         )
 
@@ -89,17 +89,17 @@ rule relabund_plot:
 
 rule rarefied_relabund_plot:
     input:
-        biom = f"{workdir}/export/rarefied-feature-table.biom",
-        tax  = f"{workdir}/export/taxonomy.tsv",
+        biom = f"{workdir_path}/export/rarefied-feature-table.biom",
+        tax  = f"{workdir_path}/export/taxonomy.tsv",
         metadata = config["metadata_tsv"]
     output:
-        pdf = f"{workdir}/visualization/rarefied_rel_abund.pdf"
+        pdf = f"{workdir_path}/visualization/rarefied_rel_abund.pdf"
     log:
-        f"{workdir}/logs/rarefied_relabund_plot.log"
+        f"{workdir_path}/logs/rarefied_relabund_plot.log"
     conda:
         r_env
     shell:
         (
-            "set -euo pipefail; mkdir -p {workdir}/visualization {workdir}/logs; "
+            "set -euo pipefail; mkdir -p {workdir_path}/visualization {workdir_path}/logs; "
             "Rscript workflow/scripts/rel_abund_plot.R {input.biom} {input.tax} {input.metadata} {output.pdf} 2>&1 | tee {log}"
         ) 

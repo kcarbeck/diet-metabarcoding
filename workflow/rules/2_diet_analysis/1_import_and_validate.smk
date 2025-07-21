@@ -7,7 +7,7 @@
 manifest     = config["samplesheet"]          # tsv with sample‑id + fastq paths
 metadata_tsv = config.get("metadata_tsv", None)  # may be needed downstream
 project      = config["project_name"]
-workdir      = f"results/{project}"
+workdir_path = f"results/{project}"
 
 
 # ---------------------------------------------------------------------
@@ -19,14 +19,14 @@ rule validate_metadata:
         manifest,
         metadata_tsv 
     output:
-        touch("results/{project}/logs/validate_metadata.done")
+        touch(f"{workdir_path}/logs/validate_metadata.done")
     log:
-        f"{workdir}/logs/validate_metadata.log"
+        f"{workdir_path}/logs/validate_metadata.log"
     conda:
         qiime_env
     shell:
         (
-            "set -euo pipefail; mkdir -p {workdir}/logs; "
+            "set -euo pipefail; mkdir -p {workdir_path}/logs; "
             "python workflow/scripts/validate_metadata.py {input.manifest} {input.metadata_tsv} 2>&1 | tee {log}; "
             "touch {output}"
         )
@@ -35,10 +35,10 @@ rule validate_metadata:
 rule qiime_import_demux:
     input:
         manifest,
-        validate="results/{project}/logs/validate_metadata.done"
+        validate=f"{workdir_path}/logs/validate_metadata.done"
     output:
-        demux_qza = f"{workdir}/demux/demux_pe.qza",
-        demux_qzv = f"{workdir}/demux/demux_pe.qzv"
+        demux_qza = f"{workdir_path}/demux/demux_pe.qza",
+        demux_qzv = f"{workdir_path}/demux/demux_pe.qzv"
     params:
         # qiime expects absolute paths inside manifest – trust the user
         import_type   = "'SampleData[PairedEndSequencesWithQuality]'",
@@ -46,12 +46,12 @@ rule qiime_import_demux:
     conda:
         qiime_env
     log:
-        f"{workdir}/logs/qiime_import.log"
+        f"{workdir_path}/logs/qiime_import.log"
     shell:
         # break lines with \ to keep style neat
         (
             "set -euo pipefail; "
-            "mkdir -p {workdir}/demux {workdir}/logs; "
+            "mkdir -p {workdir_path}/demux {workdir_path}/logs; "
             # qiime import
             "qiime tools import "
             " --type {params.import_type} "

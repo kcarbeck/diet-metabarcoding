@@ -6,7 +6,7 @@
 # ---------------------------------------------------------------------
 
 project   = config["project_name"]
-workdir   = f"results/{project}"
+workdir_path = f"results/{project}"
 
 a_fwd_adapt = config.get("adapter_f", "")   # 3' adapter on fwd read
 r_rev_adapt = config.get("adapter_r", "")   # 3' adapter on rev read
@@ -23,18 +23,18 @@ def _param(flag, seq):
 
 rule cutadapt_trim:
     input:
-        demux_qza = f"{workdir}/demux/demux_pe.qza"
+        demux_qza = f"{workdir_path}/demux/demux_pe.qza"
     output:
-        trimmed_qza = f"{workdir}/trim/trimmed_pe.qza",
-        trimmed_qzv = f"{workdir}/trim/trimmed_pe.qzv"
+        trimmed_qza = f"{workdir_path}/trim/trimmed_pe.qza",
+        trimmed_qzv = f"{workdir_path}/trim/trimmed_pe.qzv"
     log:
-        f"{workdir}/logs/cutadapt/cutadapt.log"
+        f"{workdir_path}/logs/cutadapt/cutadapt.log"
     conda:
         qiime_env
     shell:
         (
             "set -euo pipefail; "
-            "mkdir -p {workdir}/trim {workdir}/logs; "
+            "mkdir -p {workdir_path}/trim {workdir_path}/logs; "
             # build cutadapt flags dynamically inside bash for readability
             "fwd_adapt='{_param('--p-adapter-f', a_fwd_adapt)}'; "
             "rev_adapt='{_param('--p-adapter-r', r_rev_adapt)}'; "

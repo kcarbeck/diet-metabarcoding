@@ -10,6 +10,13 @@
 # skipped, and the provided file is symlinked into the results directory. This
 # allows for rerunning the pipeline with a static, pre-existing dataset.
 
+# ---------------------------------------------------------------------
+# config handles
+# ---------------------------------------------------------------------
+project = config["project_name"]
+workdir_path = f"results/{project}"
+
+
 rule bold_gather_data:
     """
     Gather BOLD data from the API or use a pre-existing data file.
@@ -22,20 +29,20 @@ rule bold_gather_data:
     """
     output:
         # The final output of this step is a single TSV file containing all the raw data.
-        raw_data = f"{workdir}/bold/raw_bold_data.tsv"
+        raw_data = f"{workdir_path}/bold/raw_bold_data.tsv"
     params:
         # The script uses this directory for its intermediate downloaded files.
-        work_dir = f"{workdir}/bold",
+        work_dir = f"{workdir_path}/bold",
         # The locus (e.g., 'COI-5P') is passed to the download script.
         locus = locus
     log:
-        f"{workdir}/logs/bold_gather.log"
+        f"{workdir_path}/logs/bold_gather.log"
     conda:
         "../../envs/bold-pipeline.yml" # This environment contains the 'bold-py' library.
     shell:
         """
         set -euo pipefail
-        mkdir -p {params.work_dir} {workdir}/logs
+        mkdir -p {params.work_dir} {workdir_path}/logs
         
         # If a path to raw BOLD data is provided in the config, symlink it.
         # Otherwise, run the script to download the data from BOLD.

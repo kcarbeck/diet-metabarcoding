@@ -3,7 +3,7 @@
 # lower-case comments for consistency
 
 project   = config["project_name"]
-workdir   = f"results/{project}"
+workdir_path = f"results/{project}"
 
 # where is the trained classifier? allow override in yaml; else default per-project path
 classifier_qza = config.get("classifier_path", f"references/{project}_bold_final_classifier.qza") # ← must point at final alignment-based classifier
@@ -16,20 +16,20 @@ metadata_tsv   = config["metadata_tsv"]
 
 rule classify_taxonomy:
     input:
-        rep_seqs_qza = f"{workdir}/dada2/rep_seqs.qza"
+        rep_seqs_qza = f"{workdir_path}/dada2/rep_seqs.qza"
     params:
         classifier = classifier_qza
     output:
-        taxonomy_qza = f"{workdir}/taxonomy/taxonomy.qza",
-        taxonomy_qzv = f"{workdir}/taxonomy/taxonomy.qzv"
+        taxonomy_qza = f"{workdir_path}/taxonomy/taxonomy.qza",
+        taxonomy_qzv = f"{workdir_path}/taxonomy/taxonomy.qzv"
     log:
-        f"{workdir}/logs/taxonomy.log"
+        f"{workdir_path}/logs/taxonomy.log"
     conda:
         qiime_env
     shell:
         (
             "set -euo pipefail; "
-            "mkdir -p {workdir}/taxonomy {workdir}/logs; "
+            "mkdir -p {workdir_path}/taxonomy {workdir_path}/logs; "
             # check classifier exists
             "if [ ! -f {params.classifier} ]; then echo 'ERROR: Classifier file {params.classifier} not found. Please build it first by running snakemake build_final_classifier.' >&2; exit 1; fi; "
             # classify sequences
@@ -51,18 +51,18 @@ rule classify_taxonomy:
 
 rule taxa_barplot_unfiltered:
     input:
-        table_qza    = f"{workdir}/dada2/table.qza",
-        taxonomy_qza = f"{workdir}/taxonomy/taxonomy.qza",
+        table_qza    = f"{workdir_path}/dada2/table.qza",
+        taxonomy_qza = f"{workdir_path}/taxonomy/taxonomy.qza",
         metadata_tsv = metadata_tsv
     output:
-        qzv = f"{workdir}/visualization/taxa_barplot_unfiltered.qzv"
+        qzv = f"{workdir_path}/visualization/taxa_barplot_unfiltered.qzv"
     log:
-        f"{workdir}/logs/barplot_unfiltered.log"
+        f"{workdir_path}/logs/barplot_unfiltered.log"
     conda:
         qiime_env
     shell:
         (
-            "set -euo pipefail; mkdir -p {workdir}/visualization {workdir}/logs; "
+            "set -euo pipefail; mkdir -p {workdir_path}/visualization {workdir_path}/logs; "
             "qiime taxa barplot "
             " --i-table {input.table_qza} "
             " --i-taxonomy {input.taxonomy_qza} "
@@ -77,19 +77,19 @@ rule taxa_barplot_unfiltered:
 
 rule taxa_barplot:
     input:
-        table_qza    = f"{workdir}/filter/filtered_table.qza",
-        taxonomy_qza = f"{workdir}/taxonomy/taxonomy.qza",
+        table_qza    = f"{workdir_path}/filter/filtered_table.qza",
+        taxonomy_qza = f"{workdir_path}/taxonomy/taxonomy.qza",
         metadata_tsv = metadata_tsv
     output:
-        barplot_qzv = f"{workdir}/visualization/taxa_barplot.qzv"
+        barplot_qzv = f"{workdir_path}/visualization/taxa_barplot.qzv"
     log:
-        f"{workdir}/logs/barplot.log"
+        f"{workdir_path}/logs/barplot.log"
     conda:
         qiime_env
     shell:
         (
             "set -euo pipefail; "
-            "mkdir -p {workdir}/visualization {workdir}/logs; "
+            "mkdir -p {workdir_path}/visualization {workdir_path}/logs; "
             "qiime taxa barplot "
             " --i-table {input.table_qza} "
             " --i-taxonomy {input.taxonomy_qza} "

@@ -6,6 +6,16 @@
 # are essential for preparing the reference data for classifier training.
 
 # ---------------------------------------------------------------------
+# config handles
+# ---------------------------------------------------------------------
+project = config["project_name"]
+workdir_path = f"results/{project}"
+forward_primer = config["forward_primer"]
+reverse_primer = config["reverse_primer"]
+locus = config["locus"]
+bold_min_length = config["bold_min_length"]
+
+# ---------------------------------------------------------------------
 # Rule 3.1: Import sequences and taxonomy into QIIME2 format
 # ---------------------------------------------------------------------
 rule bold_import_to_qiime:
@@ -18,14 +28,14 @@ rule bold_import_to_qiime:
     """
     input:
         # Depends on the cleaned and validated output from the previous step.
-        fasta = f"{workdir}/bold/bold_cleaned_seqs.fasta",
-        taxonomy = f"{workdir}/bold/bold_cleaned_taxonomy.tsv"
+        fasta = f"{workdir_path}/bold/bold_cleaned_seqs.fasta",
+        taxonomy = f"{workdir_path}/bold/bold_cleaned_taxonomy.tsv"
     output:
         # Produces two QIIME2 artifacts: one for sequences and one for taxonomy.
-        seqs_qza = f"{workdir}/bold/bold_seqs.qza",
-        tax_qza = f"{workdir}/bold/bold_taxonomy.qza"
+        seqs_qza = f"{workdir_path}/bold/bold_seqs.qza",
+        tax_qza = f"{workdir_path}/bold/bold_taxonomy.qza"
     log:
-        f"{workdir}/logs/bold_import.log"
+        f"{workdir_path}/logs/bold_import.log"
     conda:
         "../../" + qiime_env # Uses the main QIIME2 conda environment.
     shell:
@@ -63,14 +73,14 @@ rule bold_dereplicate:
     """
     input:
         # Takes the imported QIIME2 artifacts.
-        seqs_qza = f"{workdir}/bold/bold_seqs.qza",
-        tax_qza = f"{workdir}/bold/bold_taxonomy.qza"
+        seqs_qza = f"{workdir_path}/bold/bold_seqs.qza",
+        tax_qza = f"{workdir_path}/bold/bold_taxonomy.qza"
     output:
         # Produces dereplicated versions of the sequence and taxonomy artifacts.
-        derep_seqs = f"{workdir}/bold/bold_derep_seqs.qza",
-        derep_tax = f"{workdir}/bold/bold_derep_taxonomy.qza"
+        derep_seqs = f"{workdir_path}/bold/bold_derep_seqs.qza",
+        derep_tax = f"{workdir_path}/bold/bold_derep_taxonomy.qza"
     log:
-        f"{workdir}/logs/bold_dereplicate.log"
+        f"{workdir_path}/logs/bold_dereplicate.log"
     conda:
         "../../" + qiime_env
     shell:

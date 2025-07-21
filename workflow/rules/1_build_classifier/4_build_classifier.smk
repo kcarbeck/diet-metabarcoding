@@ -7,6 +7,16 @@
 # part of Kim's original pipeline.
 
 # ---------------------------------------------------------------------
+# config handles
+# ---------------------------------------------------------------------
+project = config["project_name"]
+workdir_path = f"results/{project}"
+forward_primer = config["forward_primer"]
+reverse_primer = config["reverse_primer"]
+locus = config["locus"]
+bold_min_length = config["bold_min_length"]
+
+# ---------------------------------------------------------------------
 # Rule 4.1: Train the BOLD classifier
 # ---------------------------------------------------------------------
 rule bold_train_classifier:
@@ -20,8 +30,8 @@ rule bold_train_classifier:
     """
     input:
         # Depends on the dereplicated sequence and taxonomy artifacts.
-        seqs_qza = f"{workdir}/bold/bold_derep_seqs.qza",
-        tax_qza = f"{workdir}/bold/bold_derep_taxonomy.qza"
+        seqs_qza = f"{workdir_path}/bold/bold_derep_seqs.qza",
+        tax_qza = f"{workdir_path}/bold/bold_derep_taxonomy.qza"
     output:
         # The final classifier artifact, saved to the references directory.
         classifier = classifier_qza
@@ -29,7 +39,7 @@ rule bold_train_classifier:
         # An email address can be provided in the config for notifications.
         email = config.get("email", "")
     log:
-        f"{workdir}/logs/bold_train_classifier.log"
+        f"{workdir_path}/logs/bold_train_classifier.log"
     conda:
         qiime_env
     shell:
@@ -71,14 +81,14 @@ rule bold_evaluate_classifier:
     """
     input:
         # It requires the same inputs as the training rule, plus the trained classifier.
-        seqs_qza = f"{workdir}/bold/bold_derep_seqs.qza",
-        tax_qza = f"{workdir}/bold/bold_derep_taxonomy.qza",
+        seqs_qza = f"{workdir_path}/bold/bold_derep_seqs.qza",
+        tax_qza = f"{workdir_path}/bold/bold_derep_taxonomy.qza",
         classifier = classifier_qza
     output:
         # The output is a directory containing QIIME2 visualization artifacts.
-        evaluation_viz = directory(f"{workdir}/bold/classifier_evaluation")
+        evaluation_viz = directory(f"{workdir_path}/bold/classifier_evaluation")
     log:
-        f"{workdir}/logs/bold_evaluate_classifier.log"
+        f"{workdir_path}/logs/bold_evaluate_classifier.log"
     conda:
         qiime_env
     shell:

@@ -8,6 +8,16 @@
 # amplicon-specific classifier.
 
 # ---------------------------------------------------------------------
+# config handles
+# ---------------------------------------------------------------------
+project = config["project_name"]
+workdir_path = f"results/{project}"
+forward_primer = config["forward_primer"]
+reverse_primer = config["reverse_primer"]
+locus = config["locus"]
+bold_min_length = config["bold_min_length"]
+
+# ---------------------------------------------------------------------
 # Rule 6.1: Filter by length and import final sequences to QIIME2
 # ---------------------------------------------------------------------
 rule bold_filter_and_import_final:
@@ -20,14 +30,14 @@ rule bold_filter_and_import_final:
     trimming, ensuring only high-quality, full-length amplicons are used.
     """
     input:
-        final_fasta = f"{workdir}/bold/alignment/ref_primers_trimmed_large.fasta"
+        final_fasta = f"{workdir_path}/bold/alignment/ref_primers_trimmed_large.fasta"
     output:
-        aligned_qza = f"{workdir}/bold/alignment/BOLD_anml_seqs_aligned.qza",
-        degapped_qza = f"{workdir}/bold/alignment/BOLD_anml_seqs_aligned_nogaps.qza"
+        aligned_qza = f"{workdir_path}/bold/alignment/BOLD_anml_seqs_aligned.qza",
+        degapped_qza = f"{workdir_path}/bold/alignment/BOLD_anml_seqs_aligned_nogaps.qza"
     params:
         min_length = config.get("bold_min_length", 165)
     log:
-        f"{workdir}/logs/bold_filter_length_import.log"
+        f"{workdir_path}/logs/bold_filter_length_import.log"
     conda:
         "../../" + qiime_env
     shell:
@@ -60,19 +70,19 @@ rule bold_prepare_final_taxonomy:
     """
     input:
         # We need the QIIME artifact of the sequences to get the final list of IDs
-        degapped_qza = f"{workdir}/bold/alignment/BOLD_anml_seqs_aligned_nogaps.qza",
+        degapped_qza = f"{workdir_path}/bold/alignment/BOLD_anml_seqs_aligned_nogaps.qza",
         # And the original full taxonomy file
-        full_tax_tsv = f"{workdir}/bold/alignment/derep_taxonomy.tsv"
+        full_tax_tsv = f"{workdir_path}/bold/alignment/derep_taxonomy.tsv"
     output:
-        final_taxonomy_qza = f"{workdir}/bold/alignment/ref_primers_large_taxonomy.qza"
+        final_taxonomy_qza = f"{workdir_path}/bold/alignment/ref_primers_large_taxonomy.qza"
     log:
-        f"{workdir}/logs/bold_prepare_final_taxonomy.log"
+        f"{workdir_path}/logs/bold_prepare_final_taxonomy.log"
     conda:
         "../../" + qiime_env
     shell:
         """
         set -euo pipefail
-        tmp_dir="{workdir}/bold/alignment/tmp_final_tax"
+        tmp_dir="{workdir_path}/bold/alignment/tmp_final_tax"
         mkdir -p $tmp_dir
 
         echo "Exporting final sequence IDs to filter taxonomy..."
@@ -123,8 +133,8 @@ rule bold_final_dereplicate_and_train:
     Perform a final dereplication and train the amplicon-specific classifier.
     """
     input:
-        degapped_qza = f"{workdir}/bold/alignment/BOLD_anml_seqs_aligned_nogaps.qza",
-        taxonomy_qza = f"{workdir}/bold/alignment/ref_primers_large_taxonomy.qza"
+        degapped_qza = f"{workdir_path}/bold/alignment/BOLD_anml_seqs_aligned_nogaps.qza",
+        taxonomy_qza = f"{workdir_path}/bold/alignment/ref_primers_large_taxonomy.qza"
     output:
         classifier = f"references/{project}_bold_final_classifier.qza"
     params:
@@ -132,13 +142,13 @@ rule bold_final_dereplicate_and_train:
         n_jobs = config.get("n_jobs", 6),
         email = config.get("email", "")
     log:
-        f"{workdir}/logs/bold_train_final_classifier.log"
+        f"{workdir_path}/logs/bold_train_final_classifier.log"
     conda:
         "../../" + qiime_env
     shell:
         """
         set -euo pipefail
-        tmp_dir="{workdir}/bold/alignment/tmp_final_train"
+        tmp_dir="{workdir_path}/bold/alignment/tmp_final_train"
         mkdir -p $tmp_dir
 
         echo "Performing final dereplication before training..."

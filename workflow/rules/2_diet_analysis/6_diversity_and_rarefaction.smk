@@ -17,17 +17,17 @@ rarefy_sampling_depth = int(config.get("rarefy_sampling_depth", 2000))
 
 rule taxa_collapse:
     input:
-        table_qza    = f"{workdir}/filter/filtered_table.qza",
-        taxonomy_qza = f"{workdir}/taxonomy/taxonomy.qza"
+        table_qza    = f"{workdir_path}/filter/filtered_table.qza",
+        taxonomy_qza = f"{workdir_path}/taxonomy/taxonomy.qza"
     output:
-        collapsed_qza = f"{workdir}/diversity/table_collapsed.qza"
+        collapsed_qza = f"{workdir_path}/diversity/table_collapsed.qza"
     log:
-        f"{workdir}/logs/taxa_collapse.log"
+        f"{workdir_path}/logs/taxa_collapse.log"
     conda:
         qiime_env
     shell:
         (
-            "set -euo pipefail; mkdir -p {workdir}/diversity {workdir}/logs; "
+            "set -euo pipefail; mkdir -p {workdir_path}/diversity {workdir_path}/logs; "
             "qiime taxa collapse "
             " --i-table {input.table_qza} "
             " --i-taxonomy {input.taxonomy_qza} "
@@ -42,12 +42,12 @@ rule taxa_collapse:
 
 rule alpha_rarefaction:
     input:
-        collapsed_qza = f"{workdir}/diversity/table_collapsed.qza",
+        collapsed_qza = f"{workdir_path}/diversity/table_collapsed.qza",
         metadata_tsv  = metadata_tsv
     output:
-        qzv = f"{workdir}/diversity/alpha_rarefaction.qzv"
+        qzv = f"{workdir_path}/diversity/alpha_rarefaction.qzv"
     log:
-        f"{workdir}/logs/alpha_rarefaction.log"
+        f"{workdir_path}/logs/alpha_rarefaction.log"
     conda:
         qiime_env
     shell:
@@ -69,17 +69,17 @@ rule alpha_rarefaction:
 
 rule rarefy_table:
     input:
-        table_qza = f"{workdir}/filter/filtered_table.qza"
+        table_qza = f"{workdir_path}/filter/filtered_table.qza"
     output:
-        rarefied_qza = f"{workdir}/diversity/rarefied_table.qza",
-        rarefied_qzv = f"{workdir}/diversity/rarefied_table.qzv"
+        rarefied_qza = f"{workdir_path}/diversity/rarefied_table.qza",
+        rarefied_qzv = f"{workdir_path}/diversity/rarefied_table.qzv"
     log:
-        f"{workdir}/logs/rarefy_table.log"
+        f"{workdir_path}/logs/rarefy_table.log"
     conda:
         qiime_env
     shell:
         (
-            "set -euo pipefail; mkdir -p {workdir}/diversity {workdir}/logs; "
+            "set -euo pipefail; mkdir -p {workdir_path}/diversity {workdir_path}/logs; "
             "qiime feature-table rarefy "
             " --i-table {input.table_qza} "
             " --p-sampling-depth {rarefy_sampling_depth} "
@@ -98,18 +98,18 @@ rule rarefy_table:
 
 rule taxa_barplot_rarefied:
     input:
-        table_qza    = f"{workdir}/diversity/rarefied_table.qza",
-        taxonomy_qza = f"{workdir}/taxonomy/taxonomy.qza",
+        table_qza    = f"{workdir_path}/diversity/rarefied_table.qza",
+        taxonomy_qza = f"{workdir_path}/taxonomy/taxonomy.qza",
         metadata_tsv = metadata_tsv
     output:
-        qzv = f"{workdir}/visualization/taxa_barplot_rarefied.qzv"
+        qzv = f"{workdir_path}/visualization/taxa_barplot_rarefied.qzv"
     log:
-        f"{workdir}/logs/barplot_rarefied.log"
+        f"{workdir_path}/logs/barplot_rarefied.log"
     conda:
         qiime_env
     shell:
         (
-            "set -euo pipefail; mkdir -p {workdir}/visualization {workdir}/logs; "
+            "set -euo pipefail; mkdir -p {workdir_path}/visualization {workdir_path}/logs; "
             "qiime taxa barplot "
             " --i-table {input.table_qza} "
             " --i-taxonomy {input.taxonomy_qza} "
