@@ -9,8 +9,6 @@ metadata_tsv = config.get("metadata_tsv", None)  # may be needed downstream
 project      = config["project_name"]
 workdir      = f"results/{project}"
 
-# qiime2 env; lives in envs/qiime2-2025.4.yml (already committed)
-qiime_env = "../../envs/qiime2-2025.4.yml"  # path is relative to snakefile root
 
 # ---------------------------------------------------------------------
 # rule: qiime import paired-end fastqs -> demux.qza + qzv summary

@@ -9,8 +9,6 @@ workdir   = f"results/{project}"
 classifier_qza = config.get("classifier_path", f"references/{project}_bold_final_classifier.qza") # ← must point at final alignment-based classifier
 metadata_tsv   = config["metadata_tsv"]
 
-qiime_env = "../../envs/qiime2-2025.4.yml"
-
 # ---------------------------------------------------------------------
 # 1) classify rep sequences – depends on classifier
 #    classifier itself may be built by rules in rescript.smk (included separately)

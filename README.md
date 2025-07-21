@@ -58,7 +58,7 @@ diet-metabarcoding/
 
 **Clone the repository:**
 ```bash
-git clone git@github.com:kcarbeck/diet-metabarcoding.git
+git clone https://github.com/kcarbeck/diet-metabarcoding.git
 cd diet-metabarcoding
 ```
 
@@ -68,17 +68,17 @@ The workflow relies on two separate Conda environments. Create them using the pr
 # It's recommended to use mamba for faster environment creation
 # conda install -n base -c conda-forge mamba
 
+#Download the specific QIIME2 environment file if you don't have it
+# Note: The version should match the one specified in the rules.
+# This example uses 2024.10, but adjust as needed.
+# wget https://data.qiime2.org/distro/metagenome/qiime2-metagenome-2024.10-py310-linux-conda.yml \
+#   -O envs/qiime2-metagenome-2024.10.yml
+
 # Create the environment for the BOLD pipeline
 mamba env create -f envs/bold-pipeline.yml
 
 # Create the environment for the main QIIME2 analysis
-mamba env create -f envs/qiime2-2025.4.yml
-
-#Download the specific QIIME2 environment file if you don't have it
-# Note: The version should match the one specified in the rules.
-# This example uses 2025.4, but adjust as needed.
-wget https://data.qiime2.org/distro/core/qiime2-2025.4-py310-linux-conda.yml \
-     -O envs/qiime2-2025.4.yml
+mamba env create -f envs/qiime2-metagenome-2024.10.yml
 ```
 
 ### 2. Configure Your Project

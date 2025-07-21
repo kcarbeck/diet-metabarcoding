@@ -16,7 +16,7 @@ configfile: "config/orchards.yaml"
 # This ensures consistency and makes the pipeline easier to maintain.
 project = config["project_name"]
 workdir = f"results/{project}"
-qiime_env = "envs/qiime2-2025.4.yml" # Central QIIME environment
+qiime_env ="envs/qiime2-metagenome-2024.10.yml" # central QIIME environment
 
 # BOLD classifier-specific parameters are now defined in the config
 # and accessed directly within their respective rules. This keeps the
@@ -130,7 +130,9 @@ rule run_diet_pipeline:
         f"{workdir}/visualization/taxa_barplot.qzv",
         f"{workdir}/visualization/taxa_barplot_unfiltered.qzv",
         f"{workdir}/visualization/taxa_barplot_rarefied.qzv",
-        f"{workdir}/diversity/alpha_rarefaction.qzv"
+        f"{workdir}/diversity/alpha_rarefaction.qzv",
+        f"{workdir}/visualization/rel_abund.pdf",
+        f"{workdir}/visualization/rarefied_rel_abund.pdf"
     output:
         touch(f"{workdir}/diet_analysis_complete.txt")
     params:

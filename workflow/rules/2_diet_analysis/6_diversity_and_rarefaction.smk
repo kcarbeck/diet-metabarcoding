@@ -4,7 +4,6 @@
 project   = config["project_name"]
 workdir   = f"results/{project}"
 metadata_tsv = config["metadata_tsv"]
-qiime_env = "../../envs/qiime2-2025.4.yml"
 
 # yaml‑tunable params with legacy defaults
 collapse_level        = int(config.get("collapse_level", 7))

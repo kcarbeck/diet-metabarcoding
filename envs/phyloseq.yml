@@ -1,0 +1,11 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base=4.2
+  - r-phyloseq
+  - r-ggplot2
+  - r-biomformat
+  - r-vegan
+  - r-essentials 

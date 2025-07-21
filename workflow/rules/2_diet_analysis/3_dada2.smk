@@ -13,8 +13,6 @@ trunc_len_f = config.get("trunc_len_f", 0)  # 0 means "do not truncate" in qiime
 trunc_len_r = config.get("trunc_len_r", 0)
 min_overlap = config.get("min_overlap", 12) # default in qiime is 12
 
-qiime_env = "../../envs/qiime2-2025.4.yml"
-
 # ---------------------------------------------------------------------
 # rule: dada2 denoise-paired
 # ---------------------------------------------------------------------

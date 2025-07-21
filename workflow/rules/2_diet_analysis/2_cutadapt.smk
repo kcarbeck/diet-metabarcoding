@@ -13,8 +13,6 @@ r_rev_adapt = config.get("adapter_r", "")   # 3' adapter on rev read
 fwd_primer  = config.get("forward_primer", "")   # 5' primer on fwd read
 rev_primer  = config.get("reverse_primer", "")   # 5' primer on rev read
 
-qiime_env = "../../envs/qiime2-2025.4.yml"
-
 # helper to build optional parameter strings; returns "" if seq is ""
 def _param(flag, seq):
     return f" {flag} {seq}" if seq else ""

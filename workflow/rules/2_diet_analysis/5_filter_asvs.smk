@@ -20,8 +20,6 @@ min_samples = int(round(min_prev * _sample_n)) if min_prev > 0 else 0
 # helper to add param only if value > 0 or non-empty
 _param = lambda flag, val: f" {flag} {val}" if val else ""
 
-qiime_env = "../../envs/qiime2-2025.4.yml"
-
 # ---------------------------------------------------------------------
 # rule: filter feature table by taxonomy + freq/prevalence
 # ---------------------------------------------------------------------
