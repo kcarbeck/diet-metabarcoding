@@ -241,3 +241,89 @@ snakemake --use-conda --configfile config/my_project.yaml --cores 8 --forcerun d
    ...
    ```
 
+________________________
+
+<br>
+
+## Example workflow
+
+### 1. Load snakemake
+
+```bash
+mamba activate snakemake
+```
+
+### 2. Update YAML
+Open `config/<project>.yaml` and set parameters
+
+If you have already downloaded BOLD database for training the classifier, be sure to set:
+`bold_raw_path: "/absolute/path/to/all_bold_data.tsv"`
+
+Adjust primers, locus, cores, email etc in the same file.
+
+### 3. Running the pipeline (rule-by-rule)
+
+```bash
+# see every rule in the pipeline:
+snakemake --list
+
+# see every rule in classifier pipeline:
+snakemake --list | grep '^bold_'
+
+#draw a dependency graph for the classifier branch:
+snakemake --dag build_final_classifier \
+        | dot -Tpdf > bold_classifier_dag.pdf
+```
+
+Snakemake lets you stop after a given rule by using `--until` so you can stop and inspect results before moving on to the next rule.
+
+Below are the command series for the BOLD classifier pipeline (assuming path pointing to previously downloaded BOLD data). Update number of cores!
+
+```bash
+############################################################################
+# PART 1: quick “general” classifier (through dereplication and training)
+############################################################################
+snakemake --use-conda --cores 4 --until bold_gather_data            # raw_bold_data.tsv (symlink)
+snakemake --use-conda --cores 4 --until bold_geo_filter             # bold_filtered.tsv
+snakemake --use-conda --cores 4 --until bold_extract_reads          # bold_trimmed_seqs.fasta / taxonomy.tsv
+snakemake --use-conda --cores 4 --until bold_clean_and_validate     # bold_cleaned_*.*
+snakemake --use-conda --cores 4 --until bold_import_to_qiime        # bold_seqs.qza / taxonomy.qza
+snakemake --use-conda --cores 4 --until bold_dereplicate            # bold_derep_*.qza
+snakemake --use-conda --cores 4 --until bold_train_classifier       # references/<project>_bold_initial_classifier.qza
+
+
+############################################################################
+# PART 2: alignment workflow that trims to the exact amplicon
+############################################################################
+snakemake --use-conda --cores 4 --until bold_prepare_small_alignment_subsample
+snakemake --use-conda --cores 4 --until bold_create_primers_fasta
+snakemake --use-conda --cores 4 --until bold_small_alignment
+snakemake --use-conda --cores 4 --until bold_identify_primer_coordinates
+snakemake --use-conda --cores 4 --until bold_prepare_large_alignment_set
+snakemake --use-conda --cores 4 --until bold_large_alignment
+snakemake --use-conda --cores 4 --until bold_extract_large_amplicon
+snakemake --use-conda --cores 4 --until bold_filter_and_import_final
+snakemake --use-conda --cores 4 --until bold_prepare_final_taxonomy
+snakemake --use-conda --cores 4 --until bold_final_dereplicate_and_train   #final classifier
+
+# optional: evaluate the classifier? WORK IN PROGRESS
+snakemake --use-conda --cores 4 --until bold_evaluate_classifier
+```
+
+**OTHER TIPS:**
+- Use `snakemake -n --use-conda --until RULE` (“dry run”) first
+  - this will print the shell commands without executing them
+- All logs are written to `results/<project>/logs/`
+  - open them in using nano or tail them live:
+    ```bash
+    tail -f results/<project>/logs/bold_geo_filter.log
+    ```
+- if you need to re-run a rule after changing parameters:
+  ```bash 
+   -R <rule_name> 
+   #e.g.:
+   snakemake -R bold_extract_reads 
+   ```
+   - This will force rerunning even if outputs already exist.
+  
+- Generating a DAG after each step (see above) is a great way to visualise progress and dependencies!
