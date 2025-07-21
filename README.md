@@ -66,7 +66,8 @@ cd diet-metabarcoding
 The workflow relies on two separate Conda environments. Create them using the provided YAML files. Using `mamba` is recommended for faster environment creation.
 ```bash
 # It's recommended to use mamba for faster environment creation
-# conda install -n base -c conda-forge mamba
+conda install -n base -c conda-forge mamba
+#otherwise can use 'conda' instead of 'mamba' below
 
 #Download the specific QIIME2 environment file if you don't have it
 # Note: The version should match the one specified in the rules.
@@ -74,11 +75,15 @@ The workflow relies on two separate Conda environments. Create them using the pr
 # wget https://data.qiime2.org/distro/metagenome/qiime2-metagenome-2024.10-py310-linux-conda.yml \
 #   -O envs/qiime2-metagenome-2024.10.yml
 
-# Create the environment for the BOLD pipeline
+# create the environment for the BOLD pipeline
 mamba env create -f envs/bold-pipeline.yml
 
-# Create the environment for the main QIIME2 analysis
+# create the environment for the main QIIME2 analysis
 mamba env create -f envs/qiime2-metagenome-2024.10.yml
+
+# create snakemake env
+mamba create -n snakemake snakemake -c conda-forge -c bioconda
+mamba activate snakemake
 ```
 
 ### 2. Configure Your Project

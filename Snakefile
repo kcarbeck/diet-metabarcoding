@@ -15,8 +15,14 @@ configfile: "config/orchards.yaml"
 # Define high-level variables that are used across multiple rules.
 # This ensures consistency and makes the pipeline easier to maintain.
 project = config["project_name"]
-workdir = f"results/{project}"
+workdir: f"results/{project}"
 qiime_env ="envs/qiime2-metagenome-2024.10.yml" # central QIIME environment
+
+# Define variables used across multiple rule files
+locus = config["locus"]
+bold_raw_path = config.get("bold_raw_path", "")
+classifier_qza = config.get("classifier_path", f"references/{project}_bold_final_classifier.qza")
+workdir_path = f"results/{project}"
 
 # BOLD classifier-specific parameters are now defined in the config
 # and accessed directly within their respective rules. This keeps the
@@ -77,7 +83,7 @@ rule build_initial_classifier:
     input:
         classifier_qza
     output:
-        touch(f"{workdir}/bold/initial_classifier_complete.txt")
+        touch(f"{workdir_path}/bold/initial_classifier_complete.txt")
     params:
         email = config.get("email", "")
     shell:
@@ -96,7 +102,7 @@ rule build_final_classifier:
     input:
         f"references/{project}_bold_final_classifier.qza"
     output:
-        touch(f"{workdir}/bold/final_classifier_complete.txt")
+        touch(f"{workdir_path}/bold/final_classifier_complete.txt")
     params:
         email = config.get("email", "")
     shell:
@@ -118,7 +124,7 @@ rule all:
     This depends on the final classifier and produces all visualizations.
     """
     input:
-        f"{workdir}/diet_analysis_complete.txt"
+        f"{workdir_path}/diet_analysis_complete.txt"
 
 
 rule run_diet_pipeline:
@@ -127,20 +133,20 @@ rule run_diet_pipeline:
     This is the main entry point for the diet analysis workflow.
     """
     input:
-        f"{workdir}/visualization/taxa_barplot.qzv",
-        f"{workdir}/visualization/taxa_barplot_unfiltered.qzv",
-        f"{workdir}/visualization/taxa_barplot_rarefied.qzv",
-        f"{workdir}/diversity/alpha_rarefaction.qzv",
-        f"{workdir}/visualization/rel_abund.pdf",
-        f"{workdir}/visualization/rarefied_rel_abund.pdf"
+        f"{workdir_path}/visualization/taxa_barplot.qzv",
+        f"{workdir_path}/visualization/taxa_barplot_unfiltered.qzv",
+        f"{workdir_path}/visualization/taxa_barplot_rarefied.qzv",
+        f"{workdir_path}/diversity/alpha_rarefaction.qzv",
+        f"{workdir_path}/visualization/rel_abund.pdf",
+        f"{workdir_path}/visualization/rarefied_rel_abund.pdf"
     output:
-        touch(f"{workdir}/diet_analysis_complete.txt")
+        touch(f"{workdir_path}/diet_analysis_complete.txt")
     params:
         email = config.get("email", "")
     shell:
         """
-        echo "QIIME2 diet analysis pipeline is complete. Final visualizations are in {workdir}/visualization/ and {workdir}/diversity/"
+        echo "QIIME2 diet analysis pipeline is complete. Final visualizations are in {workdir_path}/visualization/ and {workdir_path}/diversity/"
         if [ -n "{params.email}" ]; then
-            echo "The QIIME2 diet analysis pipeline is complete. Find final reports in {workdir}/visualization/ and {workdir}/diversity/" | mail -s "[diet-metabarcoding] Diet Analysis Complete" "{params.email}"
+            echo "The QIIME2 diet analysis pipeline is complete. Find final reports in {workdir_path}/visualization/ and {workdir_path}/diversity/" | mail -s "[diet-metabarcoding] Diet Analysis Complete" "{params.email}"
         fi
         """
